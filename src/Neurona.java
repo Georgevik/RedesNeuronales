@@ -6,12 +6,11 @@ public class Neurona {
 	public double activacion;
 	private ArrayList<Conexion> entradas;
 	private ArrayList<Conexion> salidas;
-	public double valorEntrada;
+	private double valorEntrada;
 
-	public Neurona(int id, double bias, double activacion) {
+	public Neurona(int id, double activacion) {
 		super();
 		this.id = id;
-		this.bias = bias;
 		this.activacion = activacion;
 		this.entradas = new ArrayList<Conexion>();
 		this.salidas = new ArrayList<Conexion>();
@@ -26,17 +25,43 @@ public class Neurona {
 		salidas.add(conexion);
 	}
 
+	public void setValorActivacion(double valor){
+		this.valorEntrada = valor;
+	}
+
 	public double getPeso(){
-		if(entradas.isEmpty())
-			return valorEntrada;
-		
-		double valor = bias;
-		for(Conexion conexion : entradas){
-			valor+=conexion.peso*conexion.origen.getPeso();
+		double valor = 0;
+		//si es neurona de entrada
+		if(entradas.isEmpty()){
+			valor = valorEntrada;
+
+
+		//si es neurona de salida
+		}else if(salidas.isEmpty()){
+			for(Conexion conexion : entradas){
+				valor+=conexion.peso*conexion.origen.getPeso();
+			}
+			valor += bias;
+			valor= funcionActivacion(valor);
+			
+
+		//Capa oculta
+		}else{
+			for(Conexion conexion : entradas){
+				valor+=conexion.peso*conexion.origen.getPeso();
+			}
+			valor += bias;
+			valor= funcionActivacion(valor);
 		}
 
-		
 		return valor;
+
 	}
-	
+
+
+
+	public double funcionActivacion(double sum){
+		return Math.tanh(sum);
+	}
+
 }

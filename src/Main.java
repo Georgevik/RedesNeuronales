@@ -7,7 +7,7 @@ import java.util.HashMap;
 
 public class Main {
 	final static int N_ENTRADAS = 8;
-	final static int N_NEURONAS = 12;
+	final static int N_NEURONAS = 13;
 
 	public static void main(String[] args) {
 		HashMap<Integer, Neurona> mapNeuronas = new HashMap<Integer, Neurona>();
@@ -19,8 +19,7 @@ public class Main {
 		for (String neu : rows) {
 			stringCampos = new ArrayList<String>(Arrays.asList(neu.split("\t")));
 			neurona = new Neurona(Integer.parseInt(stringCampos.get(0).trim()),
-					Double.parseDouble(stringCampos.get(1).trim()),
-					Double.parseDouble(stringCampos.get(2).trim()));
+					Double.parseDouble(stringCampos.get(1).trim()));
 			mapNeuronas.put(neurona.id, neurona);
 		}
 
@@ -35,8 +34,13 @@ public class Main {
 					neurona = mapNeuronas.get(Integer.parseInt(stringCampos
 							.get(i)));
 				else {
-					par = new ArrayList<String>(Arrays.asList(stringCampos.get(
-							i).split(":")));
+					par = new ArrayList<String>(Arrays.asList(stringCampos.get(i).split(":")));
+					/*int idEntrada = mapNeuronas.get(Integer.parseInt(par.get(0).trim())).id;
+					int idSalida = neurona.id;
+					double peso =  Double.parseDouble(par.get(1).trim());
+					
+					System.out.println(idEntrada+" -> "+idSalida+ " => "+peso);*/
+					
 					new Conexion(mapNeuronas.get(Integer.parseInt(par.get(0)
 							.trim())), neurona, Double.parseDouble(par.get(1)
 							.trim()));
@@ -44,6 +48,8 @@ public class Main {
 			}
 
 		}
+		
+		double sumaDeRestas = 0;
 
 		rows = leerFichero("abalone.txt");
 		for (String con : rows) {
@@ -51,15 +57,30 @@ public class Main {
 
 			for (int i = 0; i < N_ENTRADAS; i++) {
 				double paco = Double.parseDouble(stringCampos.get(i).trim());
-				mapNeuronas.get(i + 1).valorEntrada = paco;
+				int id = mapNeuronas.get(i + 1).id;
+				mapNeuronas.get(i + 1).setValorActivacion(paco);;
 			}
 
 			double a = mapNeuronas.get(mapNeuronas.size()).getPeso();
-			System.out.println(a + " -> " + stringCampos.get(N_ENTRADAS));
-
+			double b = Double.parseDouble(stringCampos.get(N_ENTRADAS).trim());
+			
+			System.out.println(a+" -> "+b);
+			//System.out.println(desnormalizar(a)+" -> "+desnormalizar(b));
+			sumaDeRestas += ((a-b)*(a-b));
 		}
-
-		System.out.println(rows.size());
+		
+		System.out.println("Error cuadratico: "+sumaDeRestas);
+		System.out.println("Error cuadratico medio: "+(sumaDeRestas/rows.size()));
+	}
+	
+	public static long desnormalizar(double normal){
+		int MAX = 29;
+		int MIN = 1;
+		
+		long desnormalizar = Math.round(normal*(MAX-MIN)+MIN);
+		
+		return desnormalizar;
+		
 	}
 
 	public static ArrayList<String> leerFichero(String nombreFichero) {
