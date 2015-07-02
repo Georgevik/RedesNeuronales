@@ -8,10 +8,10 @@ public class Neurona {
 	private ArrayList<Conexion> salidas;
 	private double valorEntrada;
 
-	public Neurona(int id, double activacion) {
+	public Neurona(int id, double bias) {
 		super();
 		this.id = id;
-		this.activacion = activacion;
+		this.bias = bias;
 		this.entradas = new ArrayList<Conexion>();
 		this.salidas = new ArrayList<Conexion>();
 
@@ -30,6 +30,7 @@ public class Neurona {
 	}
 
 	public double getPeso(){
+		String texto="";
 		double valor = 0;
 		//si es neurona de entrada
 		if(entradas.isEmpty()){
@@ -39,19 +40,28 @@ public class Neurona {
 		//si es neurona de salida
 		}else if(salidas.isEmpty()){
 			for(Conexion conexion : entradas){
-				valor+=conexion.peso*conexion.origen.getPeso();
+				double pesoConexion = conexion.peso;
+				double pesoNeurona = conexion.origen.getPeso();
+				valor+=pesoConexion*pesoNeurona;
+				texto += pesoConexion+"*"+pesoNeurona+"+";
 			}
-			valor += bias;
-			valor= funcionActivacion(valor);
-			
+			//valor += bias;
+			//System.out.print("Salida= f("+texto+"+"+bias+"="+valor+")=");
+			//valor= funcionActivacion(valor);
+			//System.out.println(valor);
 
 		//Capa oculta
 		}else{
 			for(Conexion conexion : entradas){
-				valor+=conexion.peso*conexion.origen.getPeso();
+				double pesoConexion = conexion.peso;
+				double pesoNeurona = conexion.origen.getPeso();
+				valor+=pesoConexion*pesoNeurona;
+				texto += pesoConexion+"*"+pesoNeurona+"+";
 			}
 			valor += bias;
+			//System.out.print("Neu"+id+"= f("+texto+"="+valor+"+"+bias+")=");
 			valor= funcionActivacion(valor);
+			//System.out.println(valor);
 		}
 
 		return valor;

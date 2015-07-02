@@ -7,12 +7,17 @@ import java.util.HashMap;
 
 public class Main {
 	final static int N_ENTRADAS = 8;
-	final static int N_NEURONAS = 13;
+	static int N_NEURONAS;
+	static boolean isNormalizado = true;
 
 	public static void main(String[] args) {
+		String norm = "";
+		if (isNormalizado)
+			norm = "_norm";
+
 		HashMap<Integer, Neurona> mapNeuronas = new HashMap<Integer, Neurona>();
 
-		ArrayList<String> rows = leerFichero("neuronas.txt");
+		ArrayList<String> rows = leerFichero("dni.net");
 		ArrayList<String> stringCampos;
 		Neurona neurona = null;
 
@@ -23,8 +28,10 @@ public class Main {
 			mapNeuronas.put(neurona.id, neurona);
 		}
 
+		N_NEURONAS = mapNeuronas.size();
+
 		ArrayList<String> par;
-		rows = leerFichero("conexiones.txt");
+		rows = leerFichero("conexiones" + norm + ".txt");
 
 		for (String con : rows) {
 			stringCampos = new ArrayList<String>(Arrays.asList(con.split("\t")));
@@ -34,13 +41,8 @@ public class Main {
 					neurona = mapNeuronas.get(Integer.parseInt(stringCampos
 							.get(i)));
 				else {
-					par = new ArrayList<String>(Arrays.asList(stringCampos.get(i).split(":")));
-					/*int idEntrada = mapNeuronas.get(Integer.parseInt(par.get(0).trim())).id;
-					int idSalida = neurona.id;
-					double peso =  Double.parseDouble(par.get(1).trim());
-					
-					System.out.println(idEntrada+" -> "+idSalida+ " => "+peso);*/
-					
+					par = new ArrayList<String>(Arrays.asList(stringCampos.get(
+							i).split(":")));
 					new Conexion(mapNeuronas.get(Integer.parseInt(par.get(0)
 							.trim())), neurona, Double.parseDouble(par.get(1)
 							.trim()));
@@ -48,39 +50,62 @@ public class Main {
 			}
 
 		}
-		
-		double sumaDeRestas = 0;
 
-		rows = leerFichero("abalone.txt");
+		double sumaDeRestas = 0;
+		double aciertos = 0;
+		double diferenciaMedia = 0;
+
+		rows = leerFichero("dni_full.pat");
 		for (String con : rows) {
 			stringCampos = new ArrayList<String>(Arrays.asList(con.split("\t")));
 
 			for (int i = 0; i < N_ENTRADAS; i++) {
 				double paco = Double.parseDouble(stringCampos.get(i).trim());
 				int id = mapNeuronas.get(i + 1).id;
-				mapNeuronas.get(i + 1).setValorActivacion(paco);;
+				mapNeuronas.get(i + 1).setValorActivacion(paco);
+				;
 			}
 
 			double a = mapNeuronas.get(mapNeuronas.size()).getPeso();
 			double b = Double.parseDouble(stringCampos.get(N_ENTRADAS).trim());
-			
-			System.out.println(a+" -> "+b);
-			//System.out.println(desnormalizar(a)+" -> "+desnormalizar(b));
-			sumaDeRestas += ((a-b)*(a-b));
+
+			double da, db;
+			da = desnormalizar(a);
+			db = desnormalizar(b);
+			if (!isNormalizado) {
+				da = Math.round(a);
+				db = Math.round(b);
+			}
+			//System.out.println(a + " -> " + b);
+			// System.out.println(desnormalizar(a)+" -> "+desnormalizar(b));
+			if (da == db) {
+				aciertos++;
+			}
+			diferenciaMedia += Math.abs(db - da);
+
+			sumaDeRestas += ((a - b) * (a - b));
 		}
-		
-		System.out.println("Error cuadratico: "+sumaDeRestas);
-		System.out.println("Error cuadratico medio: "+(sumaDeRestas/rows.size()));
+
+		double asdf = aciertos / rows.size() * 100;
+
+		System.out.println("Error cuadrático: " + sumaDeRestas);
+		System.out.println("Error cuadrático medio: "
+				+ (sumaDeRestas / rows.size()));
+		System.out.println("Aciertos " + aciertos + " de " + rows.size());
+		System.out.println("Error de clasificación:" + (100 - asdf) + " %");
+		System.out.println("Error de aproximación: "
+				+ (diferenciaMedia / rows.size()));
+
 	}
-	
-	public static long desnormalizar(double normal){
+
+	public static long desnormalizar(double normal) {
 		int MAX = 29;
 		int MIN = 1;
-		
-		long desnormalizar = Math.round(normal*(MAX-MIN)+MIN);
-		
+
+		long desnormalizar = Math.round(normal * (MAX - MIN) + MIN);
+
 		return desnormalizar;
-		
+
 	}
 
 	public static ArrayList<String> leerFichero(String nombreFichero) {
